@@ -1,0 +1,42 @@
+<resources>
+    <string name="app_name">Gupshup</string>
+    <string name="enter_email">Enter Email</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="login">Login</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="enter_name">Enter Name</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="signup">Sign Up</string>
+    <string name="enter_correct_email">Enter Correct Email</string>
+    <string name="password_mismatch">Password Mismatch</string>
+    <string name="user_created_successfully">User Created Successfully</string>
+    <string name="signup_failed">Signup Failed: - %1$s</string>
+    <string name="dont_have_account">Dont\'t have account? \t</string>
+    <string name="failed_to_update_user">Failed to update profile : %1$s</string>
+    <string name="access_permission_required">Access permission is required.</string>
+    <string name="save">Save</string>
+    <string name="logout">Logout</string>
+    <string name="change_picture">Change Picture</string>
+    <string name="remove_picture">Remove Picture</string>
+    <string name="photo_removed_successfully">Photo removed successfully</string>
+    <string name="profile">Profile</string>
+    <string name="change_password">Change Password</string>
+    <string name="password_changed_successfully">Password changed successfully</string>
+    <string name="something_went_wrong">Something went wrong: %1$s</string>
+    <string name="reset_password_instructions">Reset Password instruction has been sent on email: %1$s</string>
+    <string name="retry">Retry</string>
+    <string name="close">Close</string>
+    <string name="failed_to_send_email">Failed to send email: %1$s</string>
+    <string name="resend_timer">Resend in : %1$s</string>
+    <string name="please_wait">Please wait...</string>
+    <string name="no_internet">Check Internet Connection</string>
+    <string name="chat">Chat</string>
+    <string name="request">Requests</string>
+    <string name="friends">Friends</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="empty_chat_list">Chat list will appear here</string>
+    <string name="empty_friends_list">Friends list will appear here</string>
+    <string name="empty_requests_list">Requests will appear here</string>
+    <string name="press_back_to_exit">Press back again to exit</string>
+</resources>
