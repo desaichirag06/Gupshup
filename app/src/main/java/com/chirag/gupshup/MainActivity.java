@@ -14,7 +14,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
+import com.chirag.gupshup.chats.ChatFragment;
 import com.chirag.gupshup.databinding.ActivityMainBinding;
+import com.chirag.gupshup.findFriends.FindFriendsFragment;
+import com.chirag.gupshup.friendRequests.RequestsFragment;
 import com.chirag.gupshup.profile.ProfileActivity;
 import com.google.android.material.tabs.TabLayout;
 

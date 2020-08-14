@@ -19,7 +19,6 @@ import androidx.databinding.DataBindingUtil;
 import com.chirag.gupshup.R;
 import com.chirag.gupshup.databinding.ActivitySignUpBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -99,45 +98,42 @@ public class SignUpActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                 progressBar.setVisibility(View.GONE);
                 if (task.isSuccessful()) {
-                    fileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            serverFileUri = uri;
+                    fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        serverFileUri = uri;
 
-                            UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
+                        UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
                                 .setDisplayName(mBinding.etName.getText().toString())
                                 .setPhotoUri(serverFileUri)
                                 .build();
 
-                            firebaseUser.updateProfile(request).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        String userID = firebaseUser.getUid();
-                                        databaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
+                        firebaseUser.updateProfile(request).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task1) {
+                                if (task1.isSuccessful()) {
+                                    String userID = firebaseUser.getUid();
+                                    databaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
 
-                                        HashMap<String, String> params = new HashMap<>();
-                                        params.put(NAME, mBinding.etName.getText().toString().trim());
-                                        params.put(EMAIL, mBinding.etEmail.getText().toString().trim());
-                                        params.put(ONLINE_STATUS, "true");
-                                        params.put(PHOTO_URL, serverFileUri.getPath());
+                                    HashMap<String, String> params = new HashMap<>();
+                                    params.put(NAME, mBinding.etName.getText().toString().trim());
+                                    params.put(EMAIL, mBinding.etEmail.getText().toString().trim());
+                                    params.put(ONLINE_STATUS, "true");
+                                    params.put(PHOTO_URL, serverFileUri.getPath());
 
-                                        databaseReference.child(userID).setValue(params).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    Toast.makeText(SignUpActivity.this, R.string.user_created_successfully, Toast.LENGTH_SHORT).show();
-                                                    startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
-                                                }
+                                    databaseReference.child(userID).setValue(params).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task1) {
+                                            if (task1.isSuccessful()) {
+                                                Toast.makeText(SignUpActivity.this, R.string.user_created_successfully, Toast.LENGTH_SHORT).show();
+                                                startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
                                             }
-                                        });
+                                        }
+                                    });
 
-                                    } else {
-                                        Toast.makeText(SignUpActivity.this, getString(R.string.failed_to_update_user, task.getException()), Toast.LENGTH_SHORT).show();
-                                    }
+                                } else {
+                                    Toast.makeText(SignUpActivity.this, getString(R.string.failed_to_update_user, task1.getException()), Toast.LENGTH_SHORT).show();
                                 }
-                            });
-                        }
+                            }
+                        });
                     });
                 }
             }

@@ -23,7 +23,6 @@ import com.chirag.gupshup.databinding.ActivityProfileBinding;
 import com.chirag.gupshup.login.ChangePasswordActivity;
 import com.chirag.gupshup.login.LoginActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -68,10 +67,10 @@ public class ProfileActivity extends AppCompatActivity {
 
             if (serverFileUri != null) {
                 Glide.with(this)
-                    .load(serverFileUri)
-                    .placeholder(R.drawable.default_profile)
-                    .error(R.drawable.default_profile)
-                    .into(mBinding.ivProfile);
+                        .load(serverFileUri)
+                        .placeholder(R.drawable.default_profile)
+                        .error(R.drawable.default_profile)
+                        .into(mBinding.ivProfile);
             }
         }
     }
@@ -85,44 +84,41 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                 if (task.isSuccessful()) {
-                    fileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            serverFileUri = uri;
+                    fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        serverFileUri = uri;
 
-                            UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
+                        UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
                                 .setDisplayName(mBinding.etName.getText().toString())
                                 .setPhotoUri(serverFileUri)
                                 .build();
 
-                            firebaseUser.updateProfile(request).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        String userID = firebaseUser.getUid();
-                                        databaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
+                        firebaseUser.updateProfile(request).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task1) {
+                                if (task1.isSuccessful()) {
+                                    String userID = firebaseUser.getUid();
+                                    databaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
 
-                                        HashMap<String, String> params = new HashMap<>();
-                                        params.put(NAME, mBinding.etName.getText().toString().trim());
-                                        params.put(EMAIL, firebaseUser.getEmail());
-                                        params.put(ONLINE_STATUS, "true");
-                                        params.put(PHOTO_URL, serverFileUri.getPath());
+                                    HashMap<String, String> params = new HashMap<>();
+                                    params.put(NAME, mBinding.etName.getText().toString().trim());
+                                    params.put(EMAIL, firebaseUser.getEmail());
+                                    params.put(ONLINE_STATUS, "true");
+                                    params.put(PHOTO_URL, serverFileUri.getPath());
 
-                                        databaseReference.child(userID).setValue(params).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    finish();
-                                                }
+                                    databaseReference.child(userID).setValue(params).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task1) {
+                                            if (task1.isSuccessful()) {
+                                                finish();
                                             }
-                                        });
+                                        }
+                                    });
 
-                                    } else {
-                                        Toast.makeText(ProfileActivity.this, getString(R.string.failed_to_update_user, task.getException()), Toast.LENGTH_SHORT).show();
-                                    }
+                                } else {
+                                    Toast.makeText(ProfileActivity.this, getString(R.string.failed_to_update_user, task1.getException()), Toast.LENGTH_SHORT).show();
                                 }
-                            });
-                        }
+                            }
+                        });
                     });
                 }
             }
@@ -131,7 +127,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void updateOnlyName() {
         UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
-            .setDisplayName(mBinding.etName.getText().toString()).build();
+                .setDisplayName(mBinding.etName.getText().toString()).build();
 
 
         firebaseUser.updateProfile(request).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -233,9 +229,9 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void removePhoto() {
         UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
-            .setDisplayName(mBinding.etName.getText().toString())
-            .setPhotoUri(null)
-            .build();
+                .setDisplayName(mBinding.etName.getText().toString())
+                .setPhotoUri(null)
+                .build();
 
         firebaseUser.updateProfile(request).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -248,14 +244,14 @@ public class ProfileActivity extends AppCompatActivity {
                     params.put(PHOTO_URL, "");
 
                     databaseReference.child(userID).setValue(params)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    finish();
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        finish();
+                                    }
                                 }
-                            }
-                        });
+                            });
 
                 } else {
                     Toast.makeText(ProfileActivity.this, getString(R.string.failed_to_update_user, task.getException()), Toast.LENGTH_SHORT).show();
