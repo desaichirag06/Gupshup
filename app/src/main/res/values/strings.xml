@@ -57,4 +57,16 @@
     <string name="enter_message">Enter Message</string>
     <string name="failed_to_send_message">Failed to send message: %1$s</string>
     <string name="message_sent_successfully">Message sent successfully</string>
+    <string name="btn_camera">Camera</string>
+    <string name="btn_gallery">Gallery</string>
+    <string name="btn_video">Video</string>
+    <string name="permission_file_access">Permission required to access files</string>
+    <string name="upload_progress">Uploading %1$s (%2$s %%)</string>
+    <string name="failed_to_upload">Failed to upload : %1$s</string>
+    <string name="forward">Forward</string>
+    <string name="delete">Delete</string>
+    <string name="share">Share</string>
+    <string name="failed_to_delete_message">Failed to delete the message: %1$s</string>
+    <string name="message_deleted_succesfully">Message deleted successfully</string>
+    <string name="failed_to_delete_file">Failed to delete file: %1$s</string>
 </resources>

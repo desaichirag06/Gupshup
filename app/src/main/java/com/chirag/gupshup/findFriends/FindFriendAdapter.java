@@ -54,7 +54,7 @@ public class FindFriendAdapter extends RecyclerView.Adapter<FindFriendAdapter.Vi
         FindFriendsLayoutBinding binding = ((ViewHolder) holder).binding;
         binding.tvFullName.setText(friendModel.getUserName());
 
-        StorageReference fileRef = FirebaseStorage.getInstance().getReference().child(IMAGES_FOLDER + "/" + friendModel.getPhotoName());
+        StorageReference fileRef = FirebaseStorage.getInstance().getReference().child(IMAGES_FOLDER + "/" + friendModel.getUserId() + ".jpg");
         fileRef.getDownloadUrl().addOnSuccessListener(uri -> Glide.with(context)
                 .load(uri)
                 .placeholder(R.drawable.default_profile)

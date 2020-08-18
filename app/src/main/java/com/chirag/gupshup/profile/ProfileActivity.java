@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 import android.widget.Toast;
@@ -22,8 +21,6 @@ import com.chirag.gupshup.R;
 import com.chirag.gupshup.databinding.ActivityProfileBinding;
 import com.chirag.gupshup.login.ChangePasswordActivity;
 import com.chirag.gupshup.login.LoginActivity;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -31,10 +28,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.util.HashMap;
 
+import static com.chirag.gupshup.common.Constants.IMAGES_FOLDER;
 import static com.chirag.gupshup.common.NodeNames.EMAIL;
 import static com.chirag.gupshup.common.NodeNames.NAME;
 import static com.chirag.gupshup.common.NodeNames.ONLINE_STATUS;
@@ -78,49 +75,40 @@ public class ProfileActivity extends AppCompatActivity {
     private void updateNameAndPhoto() {
         String strFileName = firebaseUser.getUid() + ".jpg";
 
-        final StorageReference fileRef = storageReference.child("images/" + strFileName);
+        final StorageReference fileRef = storageReference.child(IMAGES_FOLDER + "/" + strFileName);
 
-        fileRef.putFile(localFileUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                if (task.isSuccessful()) {
-                    fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        serverFileUri = uri;
+        fileRef.putFile(localFileUri).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    serverFileUri = uri;
 
-                        UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
-                                .setDisplayName(mBinding.etName.getText().toString())
-                                .setPhotoUri(serverFileUri)
-                                .build();
+                    UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
+                            .setDisplayName(mBinding.etName.getText().toString())
+                            .setPhotoUri(serverFileUri)
+                            .build();
 
-                        firebaseUser.updateProfile(request).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task1) {
-                                if (task1.isSuccessful()) {
-                                    String userID = firebaseUser.getUid();
-                                    databaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
+                    firebaseUser.updateProfile(request).addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
+                            String userID = firebaseUser.getUid();
+                            databaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
 
-                                    HashMap<String, String> params = new HashMap<>();
-                                    params.put(NAME, mBinding.etName.getText().toString().trim());
-                                    params.put(EMAIL, firebaseUser.getEmail());
-                                    params.put(ONLINE_STATUS, "true");
-                                    params.put(PHOTO_URL, serverFileUri.getPath());
+                            HashMap<String, String> params = new HashMap<>();
+                            params.put(NAME, mBinding.etName.getText().toString().trim());
+                            params.put(EMAIL, firebaseUser.getEmail());
+                            params.put(ONLINE_STATUS, "true");
+                            params.put(PHOTO_URL, serverFileUri.getPath());
 
-                                    databaseReference.child(userID).setValue(params).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task1) {
-                                            if (task1.isSuccessful()) {
-                                                finish();
-                                            }
-                                        }
-                                    });
-
-                                } else {
-                                    Toast.makeText(ProfileActivity.this, getString(R.string.failed_to_update_user, task1.getException()), Toast.LENGTH_SHORT).show();
+                            databaseReference.child(userID).setValue(params).addOnCompleteListener(task11 -> {
+                                if (task11.isSuccessful()) {
+                                    finish();
                                 }
-                            }
-                        });
+                            });
+
+                        } else {
+                            Toast.makeText(ProfileActivity.this, getString(R.string.failed_to_update_user, task1.getException()), Toast.LENGTH_SHORT).show();
+                        }
                     });
-                }
+                });
             }
         });
     }
@@ -130,28 +118,22 @@ public class ProfileActivity extends AppCompatActivity {
                 .setDisplayName(mBinding.etName.getText().toString()).build();
 
 
-        firebaseUser.updateProfile(request).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    String userID = firebaseUser.getUid();
-                    databaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
+        firebaseUser.updateProfile(request).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                String userID = firebaseUser.getUid();
+                databaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
 
-                    HashMap<String, String> params = new HashMap<>();
-                    params.put(NAME, mBinding.etName.getText().toString().trim());
+                HashMap<String, String> params = new HashMap<>();
+                params.put(NAME, mBinding.etName.getText().toString().trim());
 
-                    databaseReference.child(userID).setValue(params).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                finish();
-                            }
-                        }
-                    });
+                databaseReference.child(userID).setValue(params).addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        finish();
+                    }
+                });
 
-                } else {
-                    Toast.makeText(ProfileActivity.this, getString(R.string.failed_to_update_user, task.getException()), Toast.LENGTH_SHORT).show();
-                }
+            } else {
+                Toast.makeText(ProfileActivity.this, getString(R.string.failed_to_update_user, task.getException()), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -180,18 +162,15 @@ public class ProfileActivity extends AppCompatActivity {
         } else {
             PopupMenu popupMenu = new PopupMenu(this, v);
             popupMenu.getMenuInflater().inflate(R.menu.menu_picture, popupMenu.getMenu());
-            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
-                    int id = menuItem.getItemId();
+            popupMenu.setOnMenuItemClickListener(menuItem -> {
+                int id = menuItem.getItemId();
 
-                    if (id == R.id.mnuChangePicture) {
-                        pickImage();
-                    } else if (id == R.id.mnuRemovePicture) {
-                        removePhoto();
-                    }
-                    return false;
+                if (id == R.id.mnuChangePicture) {
+                    pickImage();
+                } else if (id == R.id.mnuRemovePicture) {
+                    removePhoto();
                 }
+                return false;
             });
             popupMenu.show();
         }
@@ -233,29 +212,23 @@ public class ProfileActivity extends AppCompatActivity {
                 .setPhotoUri(null)
                 .build();
 
-        firebaseUser.updateProfile(request).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    String userID = firebaseUser.getUid();
-                    databaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
+        firebaseUser.updateProfile(request).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                String userID = firebaseUser.getUid();
+                databaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
 
-                    HashMap<String, String> params = new HashMap<>();
-                    params.put(PHOTO_URL, "");
+                HashMap<String, String> params = new HashMap<>();
+                params.put(PHOTO_URL, "");
 
-                    databaseReference.child(userID).setValue(params)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        finish();
-                                    }
-                                }
-                            });
+                databaseReference.child(userID).setValue(params)
+                        .addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                finish();
+                            }
+                        });
 
-                } else {
-                    Toast.makeText(ProfileActivity.this, getString(R.string.failed_to_update_user, task.getException()), Toast.LENGTH_SHORT).show();
-                }
+            } else {
+                Toast.makeText(ProfileActivity.this, getString(R.string.failed_to_update_user, task.getException()), Toast.LENGTH_SHORT).show();
             }
         });
     }
