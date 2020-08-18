@@ -7,7 +7,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#ededed"
-        tools:context=".ChatActivity">
+        tools:context=".chats.ChatActivity">
+
+        <LinearLayout
+            android:id="@+id/llProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/llSendChat"
@@ -30,7 +40,7 @@
                 android:layout_weight="1"
                 android:ems="10"
                 android:hint="@string/enter_message"
-                android:inputType="textPersonName"
+                android:inputType="textLongMessage|textMultiLine"
                 android:padding="8dp" />
 
             <ImageView
@@ -38,16 +48,38 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:tint="@color/grey"
-                app:srcCompat="@drawable/ic_vector_attachment" />
+                app:srcCompat="@drawable/ic_vector_attachment"
+                app:tint="@color/grey" />
 
             <ImageView
                 android:id="@+id/ivSend"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:tint="@color/grey"
-                app:srcCompat="@drawable/ic_vector_send" />
+                app:srcCompat="@drawable/ic_vector_send"
+                app:tint="@color/grey" />
         </LinearLayout>
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/srlMessages"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/llSendChat"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/llProgress">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvMessages"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/message_layout" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

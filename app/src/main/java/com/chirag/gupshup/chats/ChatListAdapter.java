@@ -10,7 +10,6 @@ import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.chirag.gupshup.ChatActivity;
 import com.chirag.gupshup.R;
 import com.chirag.gupshup.databinding.ChatListLayoutBinding;
 import com.google.firebase.storage.FirebaseStorage;
@@ -19,7 +18,9 @@ import com.google.firebase.storage.StorageReference;
 import java.util.List;
 
 import static com.chirag.gupshup.common.Constants.IMAGES_FOLDER;
+import static com.chirag.gupshup.common.Extras.PHOTO_NAME;
 import static com.chirag.gupshup.common.Extras.USER_KEY;
+import static com.chirag.gupshup.common.Extras.USER_NAME;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHolder> {
 
@@ -45,7 +46,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
         binding.tvFullName.setText(chatListModel.getUserName());
 
 
-        StorageReference fileRef = FirebaseStorage.getInstance().getReference().child(IMAGES_FOLDER + "/" + chatListModel.getUserId());
+        StorageReference fileRef = FirebaseStorage.getInstance().getReference().child(IMAGES_FOLDER + "/" + chatListModel.getUserId() + ".jpg");
 
         fileRef.getDownloadUrl().addOnSuccessListener(uri -> Glide.with(context)
                 .load(uri)
@@ -54,7 +55,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
                 .into(binding.ivProfile));
 
         binding.llChatList.setOnClickListener(v -> context.startActivity(new Intent(context, ChatActivity.class)
-                .putExtra(USER_KEY, chatListModel.getUserId())));
+                .putExtra(USER_KEY, chatListModel.getUserId())
+                .putExtra(USER_NAME, chatListModel.getUserName())
+                .putExtra(PHOTO_NAME, chatListModel.getPhotoName())));
     }
 
     @Override
