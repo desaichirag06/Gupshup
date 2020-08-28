@@ -15,11 +15,15 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import com.chirag.gupshup.chats.ChatFragment;
+import com.chirag.gupshup.common.NodeNames;
 import com.chirag.gupshup.databinding.ActivityMainBinding;
 import com.chirag.gupshup.findFriends.FindFriendsFragment;
 import com.chirag.gupshup.friendRequests.RequestsFragment;
 import com.chirag.gupshup.profile.ProfileActivity;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +34,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        DatabaseReference databaseReferenceUsers = FirebaseDatabase.getInstance().getReference().child(NodeNames.USERS).child(firebaseAuth.getCurrentUser().getUid());
+
+        databaseReferenceUsers.child(NodeNames.ONLINE_STATUS).setValue(true);
+        databaseReferenceUsers.child(NodeNames.ONLINE_STATUS).onDisconnect().setValue(false);
 
         setViewPager();
     }

@@ -1,6 +1,7 @@
 package com.chirag.gupshup.chats;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,10 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.chirag.gupshup.common.NodeNames.LAST_MESSAGE;
+import static com.chirag.gupshup.common.NodeNames.LAST_MESSAGE_TIME;
+import static com.chirag.gupshup.common.NodeNames.UNREAD_COUNT;
+
 public class ChatFragment extends Fragment {
 
     FragmentChatBinding mBinding;
@@ -42,6 +47,7 @@ public class ChatFragment extends Fragment {
 
     private ChildEventListener childEventListener;
     private Query query;
+    private List<String> userIds;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -53,7 +59,7 @@ public class ChatFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_chat, container, false);
 
@@ -68,6 +74,7 @@ public class ChatFragment extends Fragment {
         progressBar = view.findViewById(R.id.progressBar);
 
         chatListModelList = new ArrayList<>();
+        userIds = new ArrayList<>();
 
         chatListAdapter = new ChatListAdapter(getContext(), chatListModelList);
 
@@ -91,7 +98,7 @@ public class ChatFragment extends Fragment {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                updateList(snapshot, false, snapshot.getKey());
             }
 
             @Override
@@ -116,8 +123,15 @@ public class ChatFragment extends Fragment {
     }
 
     private void updateList(DataSnapshot dataSnapshot, boolean isNew, String userId) {
-        String lastMessage = "", lastMessageTime = "", unreadCount = "";
 
+        String unreadCount = dataSnapshot.child(UNREAD_COUNT).getValue() == null
+                ? "0" : String.valueOf(dataSnapshot.child(UNREAD_COUNT).getValue());
+
+
+        String lastMessage = dataSnapshot.child(LAST_MESSAGE).getValue() != null ? String.valueOf(dataSnapshot.child(LAST_MESSAGE).getValue()) : "";
+        String lastMessageTime = dataSnapshot.child(LAST_MESSAGE_TIME).getValue() != null ? String.valueOf(dataSnapshot.child(LAST_MESSAGE_TIME).getValue()) : "";
+
+        Log.e("lastMessageTime: ", "==>" + lastMessageTime);
         progressBar.setVisibility(View.GONE);
         mBinding.tvEmptyChat.setVisibility(View.GONE);
         databaseReferenceUsers.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -130,7 +144,14 @@ public class ChatFragment extends Fragment {
                         snapshot.child(NodeNames.PHOTO_URL).getValue().toString() : "";
 
                 ChatListModel chatListModel = new ChatListModel(userId, fullName, photoName, unreadCount, lastMessage, lastMessageTime);
-                chatListModelList.add(chatListModel);
+
+                if (isNew) {
+                    chatListModelList.add(chatListModel);
+                    userIds.add(userId);
+                } else {
+                    int indexOfClickedUser = userIds.indexOf(userId);
+                    chatListModelList.set(indexOfClickedUser, chatListModel);
+                }
                 chatListAdapter.notifyDataSetChanged();
             }
 

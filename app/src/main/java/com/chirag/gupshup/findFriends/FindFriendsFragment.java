@@ -27,27 +27,18 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link FindFriendsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class FindFriendsFragment extends Fragment {
 
     FragmentFindFriendsBinding mBinding;
 
     FindFriendAdapter findFriendAdapter;
     private List<FindFriendModel> findFriendModelList;
-    private DatabaseReference databaseReference, databaseReferenceFriendRequests;
+    private DatabaseReference databaseReferenceFriendRequests;
     FirebaseUser currentUser;
     private View progressBar;
 
     public FindFriendsFragment() {
         // Required empty public constructor
-    }
-
-    public static FindFriendsFragment newInstance(String param1, String param2) {
-        return new FindFriendsFragment();
     }
 
     @Override
@@ -56,7 +47,7 @@ public class FindFriendsFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_find_friends, container, false);
 
@@ -69,16 +60,15 @@ public class FindFriendsFragment extends Fragment {
 
         progressBar = view.findViewById(R.id.progressBar);
 
-        findFriendModelList = new ArrayList<>();
-        findFriendAdapter = new FindFriendAdapter(getContext(), findFriendModelList);
-        mBinding.rvFindFriends.setAdapter(findFriendAdapter);
-
-
-        databaseReference = FirebaseDatabase.getInstance().getReference().child(NodeNames.USERS);
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child(NodeNames.USERS);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         databaseReferenceFriendRequests = FirebaseDatabase.getInstance().getReference()
                 .child(NodeNames.FRIEND_REQUESTS).child(currentUser.getUid());
+
+        findFriendModelList = new ArrayList<>();
+        findFriendAdapter = new FindFriendAdapter(getContext(), findFriendModelList);
+        mBinding.rvFindFriends.setAdapter(findFriendAdapter);
 
         mBinding.tvEmptyFriendsList.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.VISIBLE);
@@ -92,7 +82,7 @@ public class FindFriendsFragment extends Fragment {
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     String userID = ds.getKey();
-                    if (!userID.equals(currentUser.getUid()) && ds.child(NodeNames.NAME).getValue() != null) {
+                    if (userID != null && !userID.equals(currentUser.getUid()) && ds.child(NodeNames.NAME).getValue() != null) {
                         String fullName = ds.child(NodeNames.NAME).getValue().toString();
 
                         String photoName = "";

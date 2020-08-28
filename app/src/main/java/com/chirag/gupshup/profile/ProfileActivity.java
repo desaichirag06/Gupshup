@@ -18,6 +18,7 @@ import androidx.databinding.DataBindingUtil;
 
 import com.bumptech.glide.Glide;
 import com.chirag.gupshup.R;
+import com.chirag.gupshup.common.NodeNames;
 import com.chirag.gupshup.databinding.ActivityProfileBinding;
 import com.chirag.gupshup.login.ChangePasswordActivity;
 import com.chirag.gupshup.login.LoginActivity;
@@ -140,9 +141,21 @@ public class ProfileActivity extends AppCompatActivity {
 
     public void btnLogoutClick(View view) {
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        firebaseAuth.signOut();
-        startActivity(new Intent(ProfileActivity.this, LoginActivity.class));
-        finish();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference databaseReference = rootRef.child(NodeNames.TOKENS).child(currentUser.getUid());
+
+        databaseReference.setValue(null).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                firebaseAuth.signOut();
+                startActivity(new Intent(ProfileActivity.this, LoginActivity.class));
+                finish();
+            } else {
+                Toast.makeText(this, getString(R.string.something_went_wrong, task.getException()), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
     }
 
     public void btnSaveClick(View view) {

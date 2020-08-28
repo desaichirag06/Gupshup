@@ -25,6 +25,7 @@ import com.google.firebase.storage.StorageReference;
 import java.util.List;
 
 import static com.chirag.gupshup.common.Constants.IMAGES_FOLDER;
+import static com.chirag.gupshup.common.Util.sendNotification;
 
 public class FindFriendAdapter extends RecyclerView.Adapter<FindFriendAdapter.ViewHolder> {
 
@@ -51,7 +52,7 @@ public class FindFriendAdapter extends RecyclerView.Adapter<FindFriendAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull FindFriendAdapter.ViewHolder holder, int position) {
         FindFriendModel friendModel = findFriendModelList.get(position);
-        FindFriendsLayoutBinding binding = ((ViewHolder) holder).binding;
+        FindFriendsLayoutBinding binding = holder.binding;
         binding.tvFullName.setText(friendModel.getUserName());
 
         StorageReference fileRef = FirebaseStorage.getInstance().getReference().child(IMAGES_FOLDER + "/" + friendModel.getUserId() + ".jpg");
@@ -85,6 +86,10 @@ public class FindFriendAdapter extends RecyclerView.Adapter<FindFriendAdapter.Vi
                             .setValue(Constants.REQUEST_STATUS_RECEIVED).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
                             Toast.makeText(context, R.string.request_sent_successfully, Toast.LENGTH_SHORT).show();
+
+                            String title = "New Friend Request";
+                            String message = "Friend request from " + currentUser.getDisplayName();
+                            sendNotification(context, title, message, userId);
 
                             binding.btnSendRequest.setVisibility(View.GONE);
                             binding.pbRequest.setVisibility(View.GONE);

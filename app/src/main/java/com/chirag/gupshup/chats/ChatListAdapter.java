@@ -2,7 +2,10 @@ package com.chirag.gupshup.chats;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -21,6 +24,7 @@ import static com.chirag.gupshup.common.Constants.IMAGES_FOLDER;
 import static com.chirag.gupshup.common.Extras.PHOTO_NAME;
 import static com.chirag.gupshup.common.Extras.USER_KEY;
 import static com.chirag.gupshup.common.Extras.USER_NAME;
+import static com.chirag.gupshup.common.Util.getTimeAgo;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHolder> {
 
@@ -42,8 +46,28 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ChatListModel chatListModel = chatListModelList.get(position);
-        ChatListLayoutBinding binding = ((ViewHolder) holder).binding;
+        ChatListLayoutBinding binding = holder.binding;
         binding.tvFullName.setText(chatListModel.getUserName());
+
+        String lastMessage = chatListModel.getLastMessage();
+
+        lastMessage = lastMessage.length() > 30 ? lastMessage.substring(0, 30) + "..." : lastMessage;
+        binding.tvLastMessage.setText(String.format("%s", lastMessage));
+
+        String lastMessageTime = chatListModel.getLastMessageTime();
+        Log.e("lastMessageTime1: ", "==>" + lastMessageTime);
+        if (lastMessageTime == null) lastMessageTime = "";
+        Log.e("lastMessageTime2: ", "==>" + lastMessageTime);
+        if (!TextUtils.isEmpty(lastMessageTime)) {
+            binding.tvLastMessageTime.setText(getTimeAgo(Long.parseLong(lastMessageTime)));
+        }
+
+        if (!chatListModel.getUnreadCount().equalsIgnoreCase("0")) {
+            binding.tvUnreadCount.setVisibility(View.VISIBLE);
+            binding.tvUnreadCount.setText(chatListModel.getUnreadCount());
+        } else {
+            binding.tvUnreadCount.setVisibility(View.GONE);
+        }
 
 
         StorageReference fileRef = FirebaseStorage.getInstance().getReference().child(IMAGES_FOLDER + "/" + chatListModel.getUserId() + ".jpg");
