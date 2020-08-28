@@ -15,8 +15,6 @@ import com.chirag.gupshup.R;
 import com.chirag.gupshup.common.Constants;
 import com.chirag.gupshup.common.NodeNames;
 import com.chirag.gupshup.databinding.FriendRequestLayoutBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -28,6 +26,7 @@ import com.google.firebase.storage.StorageReference;
 import java.util.List;
 
 import static com.chirag.gupshup.common.Constants.IMAGES_FOLDER;
+import static com.chirag.gupshup.common.Util.sendNotification;
 
 public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdapter.ViewHolder> {
 
@@ -53,7 +52,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         FriendRequestModel requestModel = requestModelList.get(position);
-        FriendRequestLayoutBinding binding = ((ViewHolder) holder).binding;
+        FriendRequestLayoutBinding binding = holder.binding;
         binding.tvFullName.setText(requestModel.getUserName());
 
         StorageReference fileRef = FirebaseStorage.getInstance().getReference().child(IMAGES_FOLDER + "/" + requestModel.getUserId());
@@ -74,33 +73,33 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
             binding.btnAcceptRequest.setVisibility(View.GONE);
 
             databaseReferenceFriendRequest.child(currentUser.getUid()).child(requestModel.getUserId())
-                    .child(NodeNames.REQUEST_TYPE).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful()) {
-                        databaseReferenceFriendRequest.child(requestModel.getUserId()).child(currentUser.getUid())
-                                .child(NodeNames.REQUEST_TYPE).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    binding.pbDecision.setVisibility(View.GONE);
-                                    binding.btnDenyRequest.setVisibility(View.VISIBLE);
-                                    binding.btnAcceptRequest.setVisibility(View.VISIBLE);
-                                    Toast.makeText(context, R.string.request_denied_successfully, Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(context, context.getString(R.string.failed_to_deny_request, task.getException()), Toast.LENGTH_SHORT).show();
-                                    binding.pbDecision.setVisibility(View.GONE);
-                                    binding.btnDenyRequest.setVisibility(View.VISIBLE);
-                                    binding.btnAcceptRequest.setVisibility(View.VISIBLE);
-                                }
-                            }
-                        });
-                    } else {
-                        Toast.makeText(context, context.getString(R.string.failed_to_deny_request, task.getException()), Toast.LENGTH_SHORT).show();
-                        binding.pbDecision.setVisibility(View.GONE);
-                        binding.btnDenyRequest.setVisibility(View.VISIBLE);
-                        binding.btnAcceptRequest.setVisibility(View.VISIBLE);
-                    }
+                    .child(NodeNames.REQUEST_TYPE).removeValue().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    databaseReferenceFriendRequest.child(requestModel.getUserId()).child(currentUser.getUid())
+                            .child(NodeNames.REQUEST_TYPE).removeValue().addOnCompleteListener(task12 -> {
+                        if (task12.isSuccessful()) {
+                            binding.pbDecision.setVisibility(View.GONE);
+                            binding.btnDenyRequest.setVisibility(View.VISIBLE);
+                            binding.btnAcceptRequest.setVisibility(View.VISIBLE);
+                            Toast.makeText(context, R.string.request_denied_successfully, Toast.LENGTH_SHORT).show();
+
+                            String title = "New Friend Denied";
+                            String message = "Friend request denied by " + currentUser.getDisplayName();
+                            sendNotification(context, title, message, requestModel.getUserId());
+
+
+                        } else {
+                            Toast.makeText(context, context.getString(R.string.failed_to_deny_request, task12.getException()), Toast.LENGTH_SHORT).show();
+                            binding.pbDecision.setVisibility(View.GONE);
+                            binding.btnDenyRequest.setVisibility(View.VISIBLE);
+                            binding.btnAcceptRequest.setVisibility(View.VISIBLE);
+                        }
+                    });
+                } else {
+                    Toast.makeText(context, context.getString(R.string.failed_to_deny_request, task.getException()), Toast.LENGTH_SHORT).show();
+                    binding.pbDecision.setVisibility(View.GONE);
+                    binding.btnDenyRequest.setVisibility(View.VISIBLE);
+                    binding.btnAcceptRequest.setVisibility(View.VISIBLE);
                 }
             });
 
@@ -123,6 +122,11 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
                                     databaseReferenceFriendRequest.child(requestModel.getUserId()).child(currentUser.getUid())
                                             .child(NodeNames.REQUEST_TYPE).setValue(Constants.REQUEST_STATUS_ACCEPTED).addOnCompleteListener(task3 -> {
                                         if (task3.isSuccessful()) {
+
+                                            String title = "New Friend Accepted";
+                                            String message = "Friend request accepted by " + currentUser.getDisplayName();
+                                            sendNotification(context, title, message, requestModel.getUserId());
+
                                             binding.pbDecision.setVisibility(View.GONE);
                                             binding.btnDenyRequest.setVisibility(View.VISIBLE);
                                             binding.btnAcceptRequest.setVisibility(View.VISIBLE);

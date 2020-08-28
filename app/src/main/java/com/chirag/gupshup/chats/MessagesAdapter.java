@@ -9,7 +9,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import static com.chirag.gupshup.common.Constants.MESSAGE_TYPE_IMAGE;
 import static com.chirag.gupshup.common.Constants.MESSAGE_TYPE_TEXT;
@@ -57,13 +57,13 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MessageModel messageModel = messageModelList.get(position);
-        MessageLayoutBinding binding = ((ViewHolder) holder).binding;
+        MessageLayoutBinding binding = holder.binding;
         firebaseAuth = FirebaseAuth.getInstance();
         String currentUserId = firebaseAuth.getCurrentUser().getUid();
 
         String fromUserId = messageModel.getMessageFrom();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.ENGLISH);
         String dateTime = sdf.format(new Date(messageModel.getMessageTime()));
         String[] splitString = dateTime.split(" ");
         String messageTime = splitString[1];
@@ -160,6 +160,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHo
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.menu_chat_options, menu);
 
+            String selectedMessageType = String.valueOf(selectedView.getTag(R.id.TAG_MESSAGE_TYPE));
+            if (selectedMessageType.equalsIgnoreCase(MESSAGE_TYPE_TEXT)) {
+                MenuItem itemDownload = menu.findItem(R.id.mnuDownload);
+                itemDownload.setVisible(false);
+            }
+
             return true;
         }
 
@@ -183,15 +189,30 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHo
                     mode.finish();
                     break;
                 case R.id.mnuDownload:
-                    Toast.makeText(context, "Download Option Clicked", Toast.LENGTH_SHORT).show();
+                    if (context instanceof ChatActivity) {
+                        ((ChatActivity) context).downloadFile(selectedMessageId, selectedMessageType, false);
+                    }
                     mode.finish();
                     break;
                 case R.id.mnuForward:
-                    Toast.makeText(context, "Forward Option Clicked", Toast.LENGTH_SHORT).show();
+                    if (context instanceof ChatActivity) {
+                        ((ChatActivity) context).forwardMessage(selectedMessageId, selectedMessage, selectedMessageType);
+                    }
                     mode.finish();
                     break;
                 case R.id.mnuShare:
-                    Toast.makeText(context, "Share Option Clicked", Toast.LENGTH_SHORT).show();
+                    if (selectedMessageType.equalsIgnoreCase(MESSAGE_TYPE_TEXT)) {
+                        Intent intentShare = new Intent();
+                        intentShare.setAction(Intent.ACTION_SEND);
+                        intentShare.putExtra(Intent.EXTRA_TEXT, selectedMessage);
+                        intentShare.setType("text/plain");
+                        context.startActivity(intentShare);
+                    } else {
+                        if (context instanceof ChatActivity) {
+                            ((ChatActivity) context).downloadFile(selectedMessageId, selectedMessageType, true);
+                        }
+                    }
+
                     mode.finish();
                     break;
 
@@ -202,6 +223,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHo
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             actionMode = null;
+            selectedView.setBackgroundColor(context.getResources().getColor(R.color.chat_background));
         }
     };
 }

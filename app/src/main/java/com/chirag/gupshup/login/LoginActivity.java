@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
@@ -14,11 +13,11 @@ import com.chirag.gupshup.R;
 import com.chirag.gupshup.common.MessageActivity;
 import com.chirag.gupshup.common.Util;
 import com.chirag.gupshup.databinding.ActivityLoginBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.iid.FirebaseInstanceId;
+
+import static com.chirag.gupshup.common.Util.updateDeviceToken;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -34,6 +33,9 @@ public class LoginActivity extends AppCompatActivity {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
 
         if (firebaseUser != null) {
+
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult -> updateDeviceToken(LoginActivity.this, instanceIdResult.getToken()));
+
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
         }
@@ -63,18 +65,22 @@ public class LoginActivity extends AppCompatActivity {
 
                 FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
                 firebaseAuth.signInWithEmailAndPassword(mBinding.etEmail.getText().toString(), mBinding.etPassword.getText().toString())
-                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
+                        .addOnCompleteListener(task -> {
                             progressBar.setVisibility(View.GONE);
                             if (task.isSuccessful()) {
-                                startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                                finish();
+                                FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+
+                                if (firebaseUser != null) {
+
+                                    FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult -> updateDeviceToken(LoginActivity.this, instanceIdResult.getToken()));
+
+                                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                    finish();
+                                }
                             } else {
                                 Toast.makeText(LoginActivity.this, "Login Failed: - " + task.getException(), Toast.LENGTH_SHORT).show();
                             }
-                        }
-                    });
+                        });
             } else {
                 startActivity(new Intent(this, MessageActivity.class));
             }
