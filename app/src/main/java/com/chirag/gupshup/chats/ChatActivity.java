@@ -313,6 +313,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                         String lastMessage = !title.equals("New Message") ? title : msg;
 
                         updateChatDetails(ChatActivity.this, currentUserId, chatUserId, lastMessage);
+                        updateChatDetails(ChatActivity.this, chatUserId, currentUserId, lastMessage);
 
                     }
                 });
